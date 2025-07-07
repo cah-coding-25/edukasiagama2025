@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kuis Fikih Kelas 1 - FAIZ_FAHMI_ID</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #dfe9f3, #ffffff);
+      margin: 0; padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .quiz-container, .login-container {
+      background: #ffffff;
+      width: 90%;
+      max-width: 600px;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .logo {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 28px;
+      font-weight: bold;
+      color: #3498db;
+      margin-bottom: 20px;
+    }
+    .question-number { font-weight: 600; color: #666; margin-bottom: 10px; }
+    .question-text { font-size: 20px; margin-bottom: 20px; color: #2c3e50; }
+    .options label {
+      display: block;
+      margin: 10px 0;
+      background: #ecf0f1;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .options input { margin-right: 10px; }
+    .options label:hover { background: #d0e4ff; }
+    .btn {
+      margin-top: 20px;
+      padding: 12px 30px;
+      background: linear-gradient(to right, #00b4db, #0083b0);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 179, 219, 0.3);
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(to right, #0083b0, #00b4db);
+      box-shadow: 0 8px 20px rgba(0, 179, 219, 0.5);
+    }
+    #result {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 30px;
+    }
+    .analysis { text-align: left; margin-top: 20px; }
+    .hidden { display: none; }
+    input[type="text"], input[type="number"] {
+      padding: 10px;
+      width: 90%;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container" id="loginScreen">
+    <div class="logo">FAIZ_FAHMI_ID</div>
+    <h2>Masuk ke Kuis Fikih</h2>
+    <input type="text" id="studentName" placeholder="Nama Lengkap" required />
+    <input type="number" id="studentId" placeholder="No Absen / NISN" required />
+    <button class="btn" onclick="startQuiz()">Mulai Kuis</button>
+  </div>
+
+  <div class="quiz-container hidden" id="quizScreen">
+    <div class="logo">FAIZ_FAHMI_ID</div>
+    <div id="quiz"></div>
+    <button class="btn" onclick="nextQuestion()" id="nextBtn">Selanjutnya</button>
+    <div id="result"></div>
+    <div id="analysis" class="analysis"></div>
+    <button class="btn" id="downloadBtn" style="display:none" onclick="downloadPDF()">Download Hasil PDF</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const questions = [
+      { q: "Apa arti dari wudhu?", a: 0, o: ["Membersihkan diri dengan air", "Berdoa sebelum makan", "Sholat wajib", "Membaca doa tidur"] },
+      { q: "Sebelum wudhu, kita harus...", a: 3, o: ["Minum air", "Cuci baju", "Sholat", "Niat"] },
+      { q: "Berapa rukun wudhu?", a: 1, o: ["3", "6", "5", "4"] },
+      { q: "Apa yang dibasuh saat wudhu?", a: 2, o: ["Kaki saja", "Badan", "Wajah, tangan, kepala, kaki", "Semua tubuh"] },
+      { q: "Sholat wajib ada berapa kali sehari?", a: 0, o: ["5", "3", "4", "2"] },
+      { q: "Sholat pertama dalam sehari adalah...", a: 2, o: ["Maghrib", "Dzuhur", "Subuh", "Isya"] },
+      { q: "Kiblat umat Islam menghadap ke...", a: 1, o: ["Madinah", "Ka'bah", "Nabi", "Langit"] },
+      { q: "Apa arti tayamum?", a: 3, o: ["Bersih-bersih", "Mandi besar", "Berdoa", "Mengusap dengan debu"] },
+      { q: "Tayamum dilakukan ketika...", a: 2, o: ["Kita ingin mandi", "Kita sakit", "Tidak ada air", "Kita lapar"] },
+      { q: "Apa bacaan niat wudhu dimulai dengan...?", a: 0, o: ["Nawaitu", "Bismillah", "Allahu Akbar", "Subhanallah"] },
+      { q: "Setelah wudhu sebaiknya membaca...?", a: 1, o: ["Doa makan", "Doa setelah wudhu", "Azan", "Sholawat"] },
+      { q: "Wudhu batal jika...", a: 2, o: ["Makan", "Minum", "Buang air kecil", "Mandi"] },
+      { q: "Sholat maghrib terdiri dari berapa rakaat?", a: 3, o: ["4", "5", "2", "3"] },
+      { q: "Kewajiban anak muslim adalah...?", a: 1, o: ["Main", "Sholat", "Tidur", "Belajar saja"] },
+      { q: "Apa yang dilakukan sebelum masuk masjid?", a: 2, o: ["Langsung duduk", "Tidur", "Membaca doa masuk masjid", "Makan"] },
+      { q: "Doa sebelum tidur dibaca agar...?", a: 0, o: ["Dijaga Allah", "Mimpi buruk", "Cepat tidur", "Bangun pagi"] },
+      { q: "Hari raya umat Islam adalah...?", a: 1, o: ["Tahun Baru", "Idul Fitri", "Imlek", "Natal"] },
+      { q: "Berpuasa artinya...?", a: 3, o: ["Makan terus", "Tidur", "Main", "Menahan diri"] },
+      { q: "Orang tua harus...?", a: 0, o: ["Dihormati", "Dibentak", "Dilawan", "Dilupakan"] },
+      { q: "Adzan dikumandangkan untuk...?", a: 2, o: ["Tidur", "Makan", "Memanggil sholat", "Liburan"] },
+    ];
+
+    let currentQuestion = 0;
+    let answers = [];
+    let studentName = '';
+    let studentId = '';
+
+    function startQuiz() {
+      studentName = document.getElementById('studentName').value;
+      studentId = document.getElementById('studentId').value;
+      if (!studentName || !studentId) {
+        alert("Harap isi Nama dan No Absen / NISN.");
+        return;
+      }
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('quizScreen').classList.remove('hidden');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById('quiz').innerHTML = `
+        <div class="question-number">Soal ${currentQuestion + 1} dari ${questions.length}</div>
+        <div class="question-text">${q.q}</div>
+        <div class="options">
+          ${q.o.map((opt, i) => `<label><input type="radio" name="q${currentQuestion}" value="${i}"> ${opt}</label>`).join('')}
+        </div>
+      `;
+      document.getElementById('nextBtn').innerText = currentQuestion === questions.length - 1 ? "Selesai" : "Selanjutnya";
+    }
+
+    function nextQuestion() {
+      const selected = document.querySelector(`input[name='q${currentQuestion}']:checked`);
+      if (!selected) {
+        alert("Pilih salah satu jawaban terlebih dahulu!");
+        return;
+      }
+      answers[currentQuestion] = parseInt(selected.value);
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      let score = 0;
+      let analysis = `Nama: ${studentName}\nNo Absen/NISN: ${studentId}\n\n`;
+      questions.forEach((q, i) => {
+        const userAnswer = answers[i];
+        const correct = userAnswer === q.a;
+        if (correct) score += 5;
+        analysis += `${i + 1}. ${q.q}\nJawaban Anda: ${q.o[userAnswer]}\n${correct ? "✅ Benar" : "❌ Salah - Jawaban yang benar: " + q.o[q.a]}\n\n`;
+      });
+      document.getElementById('quiz').innerHTML = '';
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('result').innerText = `Nilai akhir kamu adalah: ${score}`;
+      document.getElementById('analysis').innerText = analysis;
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(14);
+      let y = 20;
+      doc.text(`Nama: ${studentName}`, 20, y);
+      doc.text(`No Absen/NISN: ${studentId}`, 20, y + 10);
+      y += 30;
+      questions.forEach((q, i) => {
+        const userAnswer = answers[i];
+        const correct = userAnswer === q.a;
+        const jawabanUser = userAnswer != null ? q.o[userAnswer] : "Belum dijawab";
+        const text = `${i + 1}. ${q.q}\nJawaban Anda: ${jawabanUser}\n${correct ? "✅ Benar" : "❌ Salah - Jawaban yang benar: " + q.o[q.a]}`;
+        doc.text(text, 20, y);
+        y += 25;
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+      const score = questions.reduce((total, q, i) => total + (answers[i] === q.a ? 5 : 0), 0);
+      doc.text(`Nilai akhir kamu adalah: ${score}`, 20, y + 10);
+      doc.save('hasil_kuis_fikih.pdf');
+    }
+  </script>
+</body>
+</html>
