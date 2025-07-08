@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kuis Fikih Kelas 1 - FAIZ_FAHMI_ID</title>
+  <title>Kuis Fikih Kelas 1 - ID_FAIZ_FAHMI</title>
   <style>
     * { box-sizing: border-box; }
     body {
